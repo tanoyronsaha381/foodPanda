@@ -4,6 +4,9 @@ import { useDispatch, useSelector } from 'react-redux'
 import { LoginData } from '../utils/LoginData'
 import { setUser,setLogOutState, setDarkMode } from '../utils/userSlice'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { removeAllItemsFromCart } from '../utils/cartSlice'
+import useOnlineStatus from '../utils/useOnlineStatus'
 
 const ProfilePhoto = ({ showLogOut, setShowLogOut }) => {
 
@@ -13,9 +16,12 @@ const ProfilePhoto = ({ showLogOut, setShowLogOut }) => {
         setShowLogOut(!showLogOut);
     };
 
+    const onlineStatus = useOnlineStatus();
+
     return(
         <div className="rounded-xl flex items-center justify-center gap-2 cursor-pointer">
             <img src={user?.userInfo?.data?.profileImage} className="w-8 rounded-full" onClick={handleClick}/>
+            { onlineStatus ===true && <span className="text-green-500 mr-4">●</span>}
         </div>
     )
 }
@@ -23,6 +29,7 @@ const ProfilePhoto = ({ showLogOut, setShowLogOut }) => {
 const NavBar = () => {
   const dispatch = useDispatch();
   const user = useSelector((store) => store.user);
+  const cartItem = useSelector((store)=>store.cart.items);
   const isLogged = user && user.isLoggedIn;
   const isDark = user.isDarkMode;
   const [showLogOut, setShowLogOut] = useState(false);
@@ -34,6 +41,7 @@ const NavBar = () => {
 
   const handleLogOut = () => {
     dispatch(setLogOutState());
+    dispatch(removeAllItemsFromCart());
   };
 
   const toggleDarkMode = () => {
@@ -44,8 +52,8 @@ const NavBar = () => {
     <div className="flex items-center justify-between p-2">
       
       <div className="flex gap-4">
-        <NavItem Name={"🏠"} />
-        <NavItem Name={"🛒"} />
+        <Link to="/"><NavItem Name={"🏠"} /></Link>
+        <Link to="/cart"><NavItem Name={"🛒"} count={cartItem.length} /></Link>
         <NavItem Name={isDark ? "🌞" : "🌙"} onClick={toggleDarkMode} />
       </div>
 
